@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.projectAPI.mapper.ProjectMapper">
+    <!-- 프로젝트 조회-->
+    <select id="getProject" resultType="com.inzent.projectAPI.vo.ProjectVO">
+        SELECT * FROM
+        (SELECT ROWNUM N, v_emp.* FROM
+        (SELECT PR.*, PM.MANAGER FROM PROJECT PR LEFT OUTER JOIN
+        ( SELECT PROJECT_ID, LISTAGG(CONCAT (CONCAT(USER_NAME,'/'),USER_EMAIL), '|') WITHIN GROUP (ORDER BY PROJECT_ID) AS MANAGER
+            FROM PROJECT_MANAGER
+        <if test="managerEmail != null and managerEmail.size != 0">
+            WHERE  USER_EMAIL IN
+            <foreach collection="managerEmail" item="email" index="index" separator="," open="(" close=")">
+                #{email}
+            </foreach>
+        </if>
+        GROUP BY PROJECT_ID) PM ON PR.PROJECT_ID = PM.PROJECT_ID WHERE DELETE_YN = 'N'
+        <if test="projectId != null and !projectId.equals('')">
+            AND PR.PROJECT_ID LIKE '%' || #{projectId} || '%'
+        </if>
+        <if test="projectCode != null and !projectCode.equals('')">
+            AND PROJECT_CODE LIKE '%' || #{projectCode} || '%'
+        </if>
+        <if test="projectName != null and !projectName.equals('')">
+            AND PROJECT_NAME LIKE '%' || #{projectName} || '%'
+        </if>
+        <if test="inspectionStatus != null and !inspectionStatus.equals('')">
+            AND INSPECTION_STATUS LIKE '%' || #{inspectionStatus} || '%'
+        </if>
+        <if test="teamId != null and !teamId.equals('')">
+            AND TEAM_ID = #{teamId}
+        </if>
+        <if test="teamName !=null and !teamName.equals('')">
+        	<choose>
+        		<when test = "searchTeamId != null and searchTeamId.size != 0">
+		        	AND TEAM_ID IN
+		            <foreach collection="searchTeamId" item="searchTeam" index="index" separator="," open="(" close=")">
+		                #{searchTeam}
+		            </foreach>
+        		</when>
+        		<otherwise>
+        			AND TEAM_ID = ''
+        		</otherwise>
+        	</choose>
+        </if>
+        ORDER BY PR.PROJECT_ID DESC) v_emp
+        <if test="userEmail != null and !userEmail.equals('')">
+            WHERE v_emp.MANAGER LIKE '%' || #{userEmail} || '%'
+        </if>
+        )
+        <if test="page.pageStart != null and !page.pageStart.equals('')">
+            WHERE N BETWEEN #{page.pageStart} AND #{page.pageEnd}
+        </if>
+    </select>
+
+    <select id="getProjectAll" resultType="Map">
+        SELECT * FROM PROJECT
+    </select>
+
+    <!-- 프로젝트 등록-->
+    <insert id="insertProject" parameterType="com.inzent.projectAPI.vo.AddProjectVO"
+            useGeneratedKeys="true" keyColumn="PROJECT_ID" keyProperty="projectId">
+        <selectKey keyProperty="projectId" resultType="String" order="BEFORE">
+            SELECT   'P' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3')  FROM dual
+        </selectKey>
+        insert into PROJECT (PROJECT_ID, DELETE_YN ,PROJECT_NAME, CUSTOMER_NAME, PROJECT_CODE, HUB_CONTRACT_COUNT, AGENT_CONTRACT_COUNT, PROJECT_STATUS, INSPECTION_STATUS, TEAM_ID)
+        values ( #{projectId},'N', #{projectName}, #{customerName}, #{projectCode}, #{hubContractCount}, #{agentContractCount}, #{projectStatus}, '0', #{teamId})
+    </insert>
+
+    <!-- 프로젝트 수정-->
+    <update id="updateProject" parameterType="com.inzent.projectAPI.vo.EditProjectVO">
+        UPDATE PROJECT SET HUB_CONTRACT_COUNT = #{hubContractCount}, AGENT_CONTRACT_COUNT = #{agentContractCount}, PROJECT_STATUS = #{projectStatus}, TEAM_ID = #{teamId} WHERE PROJECT_ID = #{projectId}
+    </update>
+
+    <!-- 프로젝트 삭제-->
+    <update id="deleteProject">
+        UPDATE PROJECT SET DELETE_YN = 'Y' WHERE PROJECT_ID = #{projectId}
+    </update>
+
+    <!--  사용자 조회  -->
+    <select id="getProjectUser" resultType="com.inzent.projectAPI.vo.ProjectUserVO">
+        SELECT * FROM PROJECT_MANAGER
+        WHERE 1=1
+        <if test="projectId != null and !projectId.equals('')">
+            AND PROJECT_ID LIKE '%' || #{projectId} || '%'
+        </if>
+        <if test="userEmail != null and !userEmail.equals('')">
+            AND USER_EMAIL LIKE '%' || #{userEmail} || '%'
+        </if>
+    </select>
+
+    <!-- 사용자 등록 및 수정-->
+    <update id="insertProjectUser" parameterType="java.util.List">
+        <foreach collection="list" item="item" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+                into PROJECT_MANAGER (PROJECT_ID, USER_EMAIL, USER_NAME) values (#{item.projectId}, #{item.userEmail} , #{item.userName})
+        </foreach>
+    </update>
+    <delete id="deleteProjectUser" parameterType="com.inzent.projectAPI.vo.ProjectUserVO">
+        DELETE FROM PROJECT_MANAGER WHERE PROJECT_ID = #{projectId}
+    </delete>
+
+    <!-- 검수 상태 수정 -->
+    <update id="updateInspection" parameterType="com.inzent.projectAPI.vo.ProjectInspectionVO">
+        UPDATE PROJECT SET
+	        inspection_status = #{inspectionStatus}
+            <if test="inspectionStatus == 2 or inspectionStatus == 3">
+                , inspection_date = TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS')
+                , inspection_user_email = #{inspectionUserEmail}
+                , inspection_user_name = #{inspectionUserName}
+            </if>
+            <if test="inspectionRejectionReason != null and !inspectionRejectionReason.equals('')">
+                , inspection_rejection_reason = #{inspectionRejectionReason, jdbcType=VARCHAR}
+            </if>
+        WHERE project_id IN
+        <foreach collection="projectIdList" item="projectIds" index="index" separator="," open="(" close=")">
+			#{projectIds}
+        </foreach>
+    </update>
+</mapper>

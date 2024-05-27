@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tiles-definitions PUBLIC "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN" "../dtd/tiles-config_3_0.dtd">
+<tiles-definitions>
+	<definition name="base.definition" template="/WEB-INF/tiles/layout.jsp">
+		<put-attribute name="header" value="/WEB-INF/tiles/header.jsp" />
+		<put-attribute name="menu" value="/WEB-INF/tiles/menu.jsp" />
+		<put-attribute name="commonModal" value="/WEB-INF/tiles/commonModal.jsp" />
+	</definition>
+
+	<definition name="login" template="/WEB-INF/views/login.jsp"/>
+
+	<definition name="index" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/project.jsp" />
+	</definition>
+
+	<definition name="project" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/project.jsp" />
+	</definition>
+
+	<definition name="projectDetail" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/projectDetail.jsp" />
+	</definition>
+
+	<definition name="deliverablesList" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/deliverablesList.jsp" />
+	</definition>
+
+	<definition name="deliverablesReg" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/deliverablesReg.jsp" />
+	</definition>
+
+	<definition name="inspection" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/inspection.jsp" />
+	</definition>
+
+	<definition name="inspectionDetail" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/inspectionDetail.jsp" />
+	</definition>
+
+	<definition name="deliverablesReason" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/deliverablesReason.jsp" />
+	</definition>
+
+	<definition name="commonCode" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/commonCode.jsp" />
+	</definition>
+
+	<definition name="user" extends="base.definition">
+		<put-attribute name="content" value="/WEB-INF/views/user.jsp" />
+	</definition>
+</tiles-definitions>

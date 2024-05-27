@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.commonAPI.mapper.CommonMapper">
+    <!--전체  API List 조회 -->
+    <select id="getApiInfo" resultType="com.inzent.commonAPI.vo.ApiInfoVO">
+        SELECT * FROM API_INFO
+    </select>
+
+    <!--API_KEY 로 API_ID 반환  -->
+    <select id="getApiId" resultType="String">
+        SELECT API_ID  FROM API_INFO
+        WHERE API_KEY = #{apiKey}
+    </select>
+
+    <!-- 특정 API_KEY가 존재하는지 확인 후 true/false 반환 -->
+    <select id="getApiExistence" resultType="String">
+        SELECT
+        CASE WHEN Count(*)>0 THEN 'true' ELSE 'false' END Result
+        FROM DMS_CMN.API_INFO
+        WHERE API_KEY IN (#{apiKey})
+
+    </select>
+    
+    <!--메뉴 조회 -->
+    <select id="getMenu" resultType="com.inzent.commonAPI.vo.MenuVO">
+        SELECT
+			M.*
+		FROM
+			MENU_AUTHORITY A,
+			USERS U,
+			MENU M,
+			API_INFO I
+		WHERE
+			M.MAPPING_URL = A.MAPPING_URL
+			AND A.AUTHORITY_ID = U.AUTHORITY_ID
+			AND A.SUB_SYSTEM = I.API_ID
+			AND A.METHOD_NAME = 'GET'
+			AND U.USER_EMAIL = #{userEmail}
+			AND I.API_KEY = #{apiKey}
+    </select>
+    
+    <!--메뉴별 권한 확인 -->
+    <select id="authorityConfirm" resultType="String">
+        SELECT
+			COUNT(*)
+		FROM
+			MENU_AUTHORITY A,
+			USERS U,
+			API_INFO I
+		WHERE
+			A.AUTHORITY_ID = U.AUTHORITY_ID
+			AND A.SUB_SYSTEM = I.API_ID
+			AND A.MAPPING_URL = #{mappingUrl}
+			AND A.METHOD_NAME = #{method}
+			AND U.USER_EMAIL = #{userEmail}
+			AND I.API_KEY = #{apiKey}
+    </select>
+    
+    <!--사용자 권한 종류 조회 -->
+    <select id="getUserAuthority" resultType="com.inzent.commonAPI.vo.UserAuthorityVO">
+        SELECT
+			AUTHORITY_ID,
+			AUTHORITY_NAME
+		FROM
+			USERS_AUTHORITY
+    </select>
+</mapper>

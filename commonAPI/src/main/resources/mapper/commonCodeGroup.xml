@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.commonAPI.mapper.CommonCodeGroupMapper">
+    <!-- 전체 공통코드그룹 조회 -->
+    <select id="getCommonCodeGroup" resultType="com.inzent.commonAPI.vo.CommonCodeGroupVO">
+        <if test="group.pageNum != 0 and group.codeGroupName == null">
+            SELECT * FROM(SELECT ROWNUM rn, v_emp.*
+            FROM (SELECT *
+            FROM COMMON_CODE_GROUP
+            ORDER BY CODE_GROUP_ID DESC) v_emp)
+            WHERE rn BETWEEN #{page.pageStart} AND #{page.pageEnd}
+        </if>
+        <if test="group.pageNum != 0  and group.codeGroupName != null">
+            SELECT * FROM(SELECT ROWNUM rn, v_emp.*
+            FROM (SELECT *
+            FROM COMMON_CODE_GROUP WHERE CODE_GROUP_NAME LIKE '%' || #{group.codeGroupName} || '%'
+            ORDER BY CODE_GROUP_ID DESC) v_emp)
+            WHERE  rn BETWEEN #{page.pageStart} AND #{page.pageEnd}
+        </if>
+        <if test="group.pageNum == 0 and group.codeGroupName != null ">
+            SELECT * FROM COMMON_CODE_GROUP
+            WHERE CODE_GROUP_NAME LIKE '%' || #{group.codeGroupName} || '%'
+        </if>
+        <if test="group.pageNum == 0 and group.codeGroupName == null ">
+            SELECT * FROM COMMON_CODE_GROUP
+        </if>
+    </select>
+
+    <!-- 공통코드그룹 그룹ID 중복조회 -->
+    <select id="getIdDuplication" parameterType="String" resultType="int">
+        SELECT COUNT(*) FROM COMMON_CODE_GROUP WHERE CODE_GROUP_ID = #{codeGroupId}
+    </select>
+
+    <!-- 공통코드그룹 그룹명 중복조회 -->
+    <select id="getNameDuplication" parameterType="String" resultType="String">
+        SELECT CODE_GROUP_ID FROM COMMON_CODE_GROUP WHERE CODE_GROUP_NAME = #{codeGroupName}
+    </select>
+
+    <!-- 공통코드그룹 등록 -->
+    <insert id="insertCommonCodeGroup"  >
+        INSERT INTO COMMON_CODE_GROUP
+        (CODE_GROUP_ID, CODE_GROUP_NAME, SUB_SYSTEM)
+        VALUES(#{group.codeGroupId}, #{group.codeGroupName}, #{group.subSystem})
+    </insert>
+
+    <!-- 공통코드그룹 수정 (code_id 기준) -->
+    <update id="updateCommonCodeGroup">
+        UPDATE COMMON_CODE_GROUP
+        SET CODE_GROUP_NAME=#{group.codeGroupName}, SUB_SYSTEM=#{group.subSystem}
+        WHERE CODE_GROUP_ID=#{group.codeGroupId}
+    </update>
+
+    <!-- 공통코드그룹 삭제 (code_id 기준) -->
+    <delete id="deleteCommonCodeGroup">
+        DELETE FROM COMMON_CODE_GROUP
+        WHERE
+        (
+        SELECT COUNT(*)
+        FROM COMMON_CODE
+        WHERE CODE_GROUP_ID IN (#{codeGroupId})) = 0
+        AND CODE_GROUP_ID=#{codeGroupId}
+    </delete>
+</mapper>

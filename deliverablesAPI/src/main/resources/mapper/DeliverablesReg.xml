@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.deliverablesAPI.mapper.DeliverablesRegMapper">
+    <!--CLOB -> String 처리-->
+    <resultMap id="registerMap" type="com.inzent.deliverablesAPI.vo.DeliverablesRegVO">
+        <result property="textContents" column="TEXT_CONTENTS" jdbcType="CLOB" javaType="java.lang.String" />
+    </resultMap>
+
+    <!--CLOB -> String 처리-->
+    <resultMap id="registerMap2" type="Map">
+        <result property="textContents" column="TEXT_CONTENTS" jdbcType="CLOB" javaType="java.lang.String" />
+    </resultMap>
+
+    <!--  산출물 등록 기능  -->
+    <!--등록된 산출물 조회 (GET)-->
+    <select id="getReg" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO" >
+        SELECT * FROM DELIVERABLES_REGISTRATION
+        WHERE DELETE_USER_EMAIL IS NULL
+        <if test="projectId != null and projectId != ''">
+            AND PROJECT_ID = #{projectId}
+        </if>
+        <if test="deliverablesId != null and deliverablesId != ''">
+            AND DELIVERABLES_ID = #{deliverablesId}
+        </if>
+    </select>
+
+    <!--특정 등록된 산출물 조회 (GET)-->
+    <select id="getRegOne" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO" >
+        SELECT * FROM DELIVERABLES_REGISTRATION WHERE REGISTRATION_ID = #{id}
+    </select>
+
+    <!-- 선택한 파일의 경로명 불러오기 (GET)-->
+    <select id="getFileInfo">
+        SELECT FILE_PATH AS "filepath", FILE_NAME AS "filename" FROM DELIVERABLES_REGISTRATION
+        WHERE REGISTRATION_ID = #{registrationId}
+    </select>
+
+    <!--산출물 목록의 디렉터리 또는 파일 등록 (POST)-->
+    <insert id="insertReg" >
+        <selectKey keyProperty="registrationId" resultType="String" order="BEFORE">
+            SELECT   'R' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3')  FROM dual
+        </selectKey>
+        INSERT INTO DELIVERABLES_REGISTRATION (REGISTRATION_ID, PROJECT_ID, DELIVERABLES_ID, CONTENT_TYPE, DELIVERABLES_TITLE, FILE_NAME, FILE_PATH, TEXT_CONTENTS, NOT_REGISTRATION_REASON, REGISTRATION_USER_EMAIL, REGISTRATION_USER_NAME, REGISTRATION_DATE)
+        VALUES (#{registrationId, jdbcType=VARCHAR}, #{post.projectId, jdbcType=VARCHAR}, #{post.deliverablesId, jdbcType=VARCHAR}, #{post.contentType, jdbcType=CHAR}, #{deliverName}, #{filename, jdbcType=VARCHAR }, #{filePath, jdbcType=VARCHAR }, #{post.textContents, jdbcType=CLOB}, #{post.notRegistrationReason, jdbcType=VARCHAR}, #{post.registrationUserEmail, jdbcType=VARCHAR}, #{post.registrationUserName, jdbcType=VARCHAR}, TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS'))
+    </insert>
+
+    <!--DB 내 삭제 파일의 데이터 삭제 (DELETE)-->
+    <update id="deleteReg">
+        UPDATE DELIVERABLES_REGISTRATION set DELETE_USER_EMAIL=#{deleteUserEmail, jdbcType=VARCHAR}, DELETE_USER_NAME=#{deleteUserName, jdbcType=VARCHAR}, DELETE_DATE=TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS')
+        WHERE REGISTRATION_ID = #{registrationId}
+    </update>
+
+    <!--사유 있는 상태에서 파일 등록 시, DB 내 사유 데이터 삭제 (DELETE)-->
+    <update id="deleteReason">
+        UPDATE DELIVERABLES_REGISTRATION set DELETE_USER_EMAIL=#{deleteUserEmail, jdbcType=VARCHAR}, DELETE_USER_NAME=#{deleteUserName, jdbcType=VARCHAR}, DELETE_DATE=TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS')
+        WHERE REGISTRATION_ID = #{registrationId} AND NOT_REGISTRATION_REASON IS NOT NULL
+    </update>
+
+    <!-- 다운로드용 등록된 산출물 조회 -->
+    <select id="getDownloadReg" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO" >
+        SELECT * FROM DELIVERABLES_REGISTRATION WHERE PROJECT_ID = #{projectId} AND DELETE_USER_EMAIL IS NULL
+    </select>
+</mapper>

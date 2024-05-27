@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.deliverablesAPI.mapper.DeliverablesReasonMapper">
+    <!--CLOB -> String 처리-->
+    <resultMap id="reasonMap" type="Map">
+        <result property="description" column="DESCRIPTION" jdbcType="CLOB" javaType="java.lang.String" />
+    </resultMap>
+
+    <!-- 준필수 파일 사유 기능  -->
+    <!--준필수 파일 DELIVERABLES_ID GET (GET)-->
+    <select id="getDeliverIdList" resultType="com.inzent.deliverablesAPI.vo.DeliverablesListVO">
+        SELECT DELIVERABLES_ID FROM DELIVERABLES_LIST WHERE REQUIRED_ITEMS = '1'
+    </select>
+
+    <!-- REGISTRATION_ID 로 (GET) 조회 -->
+    <select id="getDeliverRegIdList" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO">
+        SELECT * FROM DELIVERABLES_REGISTRATION
+        WHERE REGISTRATION_ID = #{registrationId}
+    </select>
+
+    <!--준필수 파일 DELIVERABLES_ID에 맞는 등록된 파일 목록 가져오기 (GET)-->
+    <select id="getDeliverIdFiles" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO">
+        SELECT * FROM DELIVERABLES_REGISTRATION 
+        WHERE DELIVERABLES_ID = #{deliverId} AND PROJECT_ID = #{projectId} AND DELETE_USER_EMAIL IS NULL
+    </select>
+    
+    <!--DELIVERABLES_ID에 맞는 준필수 파일 사유가 있는 목록 가져오기-->
+    <select id="getDeliverIdReason" resultType="com.inzent.deliverablesAPI.vo.DeliverablesRegVO">
+        SELECT * FROM DELIVERABLES_REGISTRATION 
+        WHERE DELIVERABLES_ID = #{deliverId} AND PROJECT_ID = #{projectId} AND DELETE_USER_EMAIL IS NULL AND NOT_REGISTRATION_REASON IS NOT NULL
+    </select>
+
+    <!--등록된 파일이 없는 준필수 파일의 일부 정보 가져오기 (GET)-->
+    <select id="getFilesInfo" resultType="com.inzent.deliverablesAPI.vo.DeliverablesReasonVO">
+        SELECT * FROM
+            (SELECT ROWNUM N, v_emp.* FROM
+                (SELECT * FROM
+                    (SELECT * FROM
+                        (SELECT * FROM DELIVERABLES_LIST WHERE REQUIRED_ITEMS IN ('0', '1') AND DELETE_YN = 'N') D
+                    LEFT OUTER JOIN
+                        (SELECT  * FROM DELIVERABLES_REGISTRATION WHERE PROJECT_ID = #{projectId} AND DELETE_USER_EMAIL IS NULL) R
+                    ON
+                        D.DELIVERABLES_ID = R.DELIVERABLES_ID
+                    WHERE
+                        R.FILE_PATH IS NULL OR R.NOT_REGISTRATION_REASON IS NOT NULL) C
+                ORDER BY C.REQUIRED_ITEMS ASC, C.DELIVERABLES_TOP_ID DESC)
+            v_emp)
+        <if test="page.pageStart != null and !page.pageStart.equals('')">
+            WHERE N BETWEEN #{page.pageStart} AND #{page.pageEnd} ORDER BY N ASC
+        </if>
+    </select>
+
+    <!--준필수 파일 사유 입력 (POST)-->
+    <insert id="insertReason" >
+        <selectKey keyProperty="registrationId" resultType="String" order="BEFORE">
+            SELECT   'R' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF3') FROM dual
+        </selectKey>
+        INSERT INTO DELIVERABLES_REGISTRATION (REGISTRATION_ID, PROJECT_ID, DELIVERABLES_ID, DELIVERABLES_TITLE, CONTENT_TYPE, FILE_PATH, NOT_REGISTRATION_REASON, REGISTRATION_USER_EMAIL, REGISTRATION_USER_NAME, REGISTRATION_DATE)
+        VALUES (#{registrationId, jdbcType=VARCHAR}, #{post.projectId, jdbcType=VARCHAR}, #{post.deliverablesId, jdbcType=VARCHAR}, #{post.deliverablesTitle, jdbcType=VARCHAR}, #{post.contentType, jdbcType=CHAR}, #{filePath, jdbcType=VARCHAR }, #{post.notRegistrationReason, jdbcType=VARCHAR}, #{post.registrationUserEmail, jdbcType=VARCHAR}, #{post.registrationUserName, jdbcType=VARCHAR}, TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS'))
+    </insert>
+
+    <!--준필수 파일 사유 수정 (PUT)-->
+    <update id="updateReason">
+        UPDATE DELIVERABLES_REGISTRATION
+        SET
+        <if test="post.notRegistrationReason != null and !post.notRegistrationReason.equals('')">
+            NOT_REGISTRATION_REASON = #{post.notRegistrationReason, jdbcType=VARCHAR},
+            REGISTRATION_USER_EMAIL = #{post.registrationUserEmail, jdbcType=VARCHAR},
+            REGISTRATION_USER_NAME = #{post.registrationUserName, jdbcType=VARCHAR}
+        </if>
+        <if test="post.notRegistrationReason == null or post.notRegistrationReason.equals('')">
+            DELETE_USER_EMAIL = #{post.registrationUserEmail, jdbcType=VARCHAR},
+            DELETE_USER_NAME = #{post.registrationUserName, jdbcType=VARCHAR},
+            DELETE_DATE = TO_CHAR(CURRENT_DATE, 'YYYYMMDDHH24MISS')
+        </if>
+        WHERE REGISTRATION_ID=#{post.registrationId}
+    </update>
+</mapper>

@@ -1,0 +1,312 @@
+.file_list_header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.file_list_header h4 {
+  margin-left: 30px;
+}
+
+.file_list_explain {
+  width: 46vh;
+  margin: 0px 8vw 0px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.file_info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+.file_info > span {
+  display: flex;
+  width: max-content;
+  padding: 2px 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* 말풍선 적절한 top 과 margin-left 로 위치조정 */
+.fileInfo_box {
+  display: none;
+  position: absolute;
+  width: max-content;
+  top: 30px;
+  padding: 8px;
+  left: 0;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.fileInfo_box:after {
+  position: absolute;
+  bottom: 100%;
+  left: 30%;
+  width: 0;
+  height: 0;
+  margin-left: -10px;
+  border: solid transparent;
+  border-color: rgba(51, 51, 51, 0);
+  border-bottom-color: #333;
+  border-width: 10px;
+  pointer-events: none;
+  content: " ";
+}
+
+.info_box {
+  display: none;
+  position: absolute;
+  width: max-content;
+  top: 30px;
+  padding: 8px;
+  margin-top: 10px;
+  left: 0;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  border-radius: 8px;
+  background: #333;
+  color: #fff;
+  font-size: 14px;
+}
+
+.info_box:after {
+  position: absolute;
+  bottom: 100%;
+  left: 30%;
+  width: 0;
+  height: 0;
+  margin-left: -10px;
+  border: solid transparent;
+  border-color: rgba(51, 51, 51, 0);
+  border-bottom-color: #333;
+  border-width: 10px;
+  pointer-events: none;
+  content: " ";
+}
+
+span:hover + p.info_box {
+  display: block;
+}
+
+span:hover + .grade + p.fileInfo_box {
+  display: block;
+  position: relative;
+  text-align-last: center;
+  width: fit-content;
+  top: 15px;
+  padding: 10px;
+  border-color: black;
+  z-index: 2;
+}
+
+.redcircle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: red;
+}
+
+.bluecircle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: blue;
+}
+
+.blackcircle {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+  border: 1px solid black;
+}
+
+#btn_black {
+  width: 80px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  text-decoration-line: none;
+}
+
+.package_buttons {
+  width: 203px;
+  height: 65px;
+  display: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  align-content: space-around;
+}
+
+#file_buttons {
+  display: flex;
+  justify-content: space-around;
+  position: absolute;
+  margin-left: 70px;
+  width: 170px;
+  height: 50px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 1px 1px 1px 1px lightgray;
+      position: absolute;
+      z-index: 1;
+}
+
+#title_buttons {
+  display: flex;
+  position: absolute;
+  margin-left: 70px;
+  width: 90px;
+  height: 50px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 1px 1px 1px 1px lightgray;
+  z-index: 1;
+}
+
+.btn_white {
+  width: 100px;
+  height: 30px;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.file_type {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.file_type > div {
+  margin-right: 30px;
+}
+
+#dir_buttons {
+  display: flex;
+  align-content: space-around;
+  justify-content: space-around;
+  position: absolute;
+  margin-left: 70px;
+  width: 190px;
+  height: 90px;
+  padding: 10px;
+  flex-wrap: wrap;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 1px 1px 1px 1px lightgray;
+  z-index: 1;
+}
+
+#btns_black_dir {
+  width: 80px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  text-decoration-line: none;
+  text-align-last: center;
+}
+
+#btns_black_file {
+  width: 70px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  text-decoration-line: none;
+  text-align-last: center;
+  font-size: 10px;
+}
+
+
+#btns_black_title {
+  width: 70px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 5px;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  text-decoration-line: none;
+  text-align-last: center;
+  font-size: 10px;
+}
+
+.ztree li a.curSelectedNode {
+  padding-top: 0px;
+  color: black;
+  height: 16px;
+}
+
+.grade0 {
+  width: 7px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: red;
+  display: inline-block;
+}
+
+.grade1 {
+  width: 7px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: blue;
+  display: inline-block;
+}
+
+.grade2 {
+  width: 7px;
+  height: 7px;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid black;
+  display: inline-block;
+}
+
+#tree_div {
+  height: 70vh;
+  width: 28%;
+  overflow-y: scroll;
+  margin-top: 10px;
+}
+
+#admin_button {
+    color: white;
+}
+
+#rootNodeDiv {
+    display: flex;
+    margin-left: 18px
+}
+
+#rootNodeDiv > img {
+    width: 20px;
+}
+
+#rootNode {
+    font-size: 13px;
+    line-height: 16px;
+    margin-left: 5px;
+}

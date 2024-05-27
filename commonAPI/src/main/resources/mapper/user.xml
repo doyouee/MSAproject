@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper SYSTEM "../dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inzent.commonAPI.mapper.UserMapper">
+    <!--사용자 조회-->
+    <select id="getUserSearchKeyword" resultType="com.inzent.commonAPI.vo.UserVO">
+        SELECT * FROM
+        ( SELECT ROWNUM rn, AA.USER_NAME, AA.USER_EMAIL, AA.TEAM_ID, AA.AUTHORITY_ID, AA.DELETE_YN, AA.CODE_NAME, AA.AUTHORITY_NAME FROM
+        ( SELECT U.*, CC.CODE_NAME, UA.AUTHORITY_NAME FROM USERS U INNER JOIN USERS_AUTHORITY UA ON U.AUTHORITY_ID = UA.AUTHORITY_ID INNER JOIN COMMON_CODE CC ON CC.CODE_ID = U.TEAM_ID WHERE DELETE_YN = 'N'
+        <if test="user.userEmail != null and user.userEmail != ''">
+            AND USER_EMAIL LIKE '%' || #{user.userEmail} || '%'
+        </if>
+        <if test="user.userName != null and user.userName != ''">
+            AND USER_NAME LIKE '%' || #{user.userName} || '%'
+        </if>
+        <if test="user.codeName != null and user.codeName != ''">
+            AND CC.CODE_NAME LIKE '%' || #{user.codeName} || '%'
+        </if>
+        <if test="user.teamId != null and user.teamId != ''">
+            AND TEAM_ID = #{user.teamId}
+        </if>
+        ORDER BY USER_EMAIL) AA )
+        <if test="page.pageStart != null and !page.pageStart.equals('')">
+            WHERE rn BETWEEN #{page.pageStart} AND #{page.pageEnd}
+        </if>
+    </select>
+
+    <!--사용자 등록-->
+    <insert id="insertUser" parameterType="com.inzent.commonAPI.vo.UserVO">
+        INSERT INTO USERS (user_password, user_name, user_email,team_id,authority_id)
+        VALUES (#{userPassword}, #{userName}, #{userEmail},#{teamId}, #{authorityId})
+    </insert>
+
+    <!--사용자 수정-->
+    <update id="updateUser" parameterType="com.inzent.commonAPI.vo.UserVO">
+        UPDATE USERS
+        SET AUTHORITY_ID = #{authorityId}, TEAM_ID = #{teamId}
+        WHERE USER_EMAIL = #{userEmail}
+    </update>
+
+    <!--사용자 비밀번호 수정-->
+    <update id="updateUserPassword" parameterType="com.inzent.commonAPI.vo.UserVO">
+        UPDATE USERS
+        SET USER_PASSWORD = #{userPassword}
+        WHERE USER_EMAIL = #{userEmail}
+    </update>
+
+    <!--사용자 삭제-->
+    <update id="deleteUser">
+        UPDATE USERS SET DELETE_YN = <![CDATA['Y']]> WHERE USER_EMAIL = #{userEmail}
+    </update>
+
+    <!--이메일 중복 검사-->
+    <select id="getSelectUserName" resultType="String">
+        SELECT USER_NAME FROM USERS
+        WHERE USER_EMAIL = #{userEmail} and DELETE_YN = #{deleteYn}
+    </select>
+
+    <select id="getSelectUserInfo" resultType="com.inzent.commonAPI.vo.UserVO">
+        SELECT
+        U.USER_NAME,
+        U.USER_EMAIL,
+        U.TEAM_ID,
+        U.AUTHORITY_ID,
+        U.DELETE_YN,
+        CC.CODE_NAME,
+        UA.AUTHORITY_NAME
+        FROM
+        USERS U
+        INNER JOIN USERS_AUTHORITY UA ON
+        U.AUTHORITY_ID = UA.AUTHORITY_ID
+        INNER JOIN COMMON_CODE CC ON
+        CC.CODE_ID = U.TEAM_ID
+        WHERE
+        U.DELETE_YN = 'N'
+        AND U.USER_EMAIL = #{user.userEmail}
+    </select>
+</mapper>

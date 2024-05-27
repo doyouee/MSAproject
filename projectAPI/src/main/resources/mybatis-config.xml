@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration SYSTEM "../dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- Null 값이 발생할 경우 빈칸이 아닌 Null로 인식 -->
+        <setting name="callSettersOnNulls" value="true"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+    </settings>
+</configuration>
+
